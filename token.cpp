@@ -45,6 +45,21 @@ std::string token::toString(){
 
 		case tok_decimal_integer_literal: return "<decimal_integer_literal:" + std::to_string(attr.value) + ">";
 
+		case tok_kw_and: return "<keyword:" + attr.name + ">";
+		case tok_kw_or: return "<keyword:" + attr.name + ">";
+		case tok_kw_not: return "<keyword:" + attr.name + ">";
+		case tok_kw_let: return "<keyword:" + attr.name + ">";
+		case tok_kw_bool: return "<keyword:" + attr.name + ">";
+		case tok_kw_char: return "<keyword:" + attr.name + ">";
+		case tok_kw_if: return "<keyword:" + attr.name + ">";
+		case tok_kw_else: return "<keyword:" + attr.name + ">";
+		case tok_kw_true: return "<keyword:" + attr.name + ">";
+		case tok_kw_false: return "<keyword:" + attr.name + ">";
+		case tok_kw_var: return "<keyword:" + attr.name + ">";
+		case tok_kw_def: return "<keyword:" + attr.name + ">";
+		case tok_kw_int: return "<keyword:" + attr.name + ">";
+		case tok_kw_float: return "<keyword:" + attr.name + ">";
+
 		default:	return "";
 	}
 }
