@@ -25,9 +25,13 @@ struct lexer{
 	//checks the next character in the string
 	char peek();
 
+	//looks one character behind the current pointer
+	char peek_back();
+
 	//increments the first pointer by 1
 	void step();
 
+	//decrements the first pointer by 1
 	void step_back();
 
 	//appends an word token
@@ -36,5 +40,6 @@ struct lexer{
 	//appends a number token
 	void number();
 
-
+	//checks for end of file
+	bool end(){return *first == *last;}
 };

@@ -60,41 +60,36 @@ enum token_name{
 	tok_kw_int,
 	tok_kw_float,
 
-	//identifiers
+	//identifier
 	tok_identifier,
 
 	//integer literals
 	tok_decimal_integer_literal,
-	tok_hexadecimal_digit,
 	tok_hexadecimal_integer_literal,
-	tok_binary_digit,
 	tok_binary_integer_literal,
 
 	//floating point literals
 	tok_floating_point_literal,
-	tok_fraction,
-	tok_exponent,
 
 	//boolean literals
 	boolean_literal,
 
-	//character literals
-	tok_character_character,
-	tok_escape_sequence,
+	//character literal
 	tok_character_literal,
 
-	//string literals
-	tok_string_character,
+	//string literal
 	tok_string_literal
 
 };
 
 struct token_attribute{
 	int value;
+	double floating;
 	std::string name;
 
 	token_attribute(){}
 	token_attribute(int value) : value(value){}
+	token_attribute(double value) : floating(value){}
 	token_attribute(std::string str) : name(str){}
 };
 
@@ -108,6 +103,8 @@ struct token{
 	token(const token_name n, std::string str);
 
 	token(const token_name n, int value);
+
+	token(const token_name n, double value);
 
 	//returns token information as string
 	std::string toString();

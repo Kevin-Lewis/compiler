@@ -52,13 +52,16 @@ void lexer::lex(){
 
 char lexer::peek(){return *(first+1);}
 
+char lexer::peek_back(){return *(first-1);}
+
 void lexer::step(){if(first != last){first++;}}
 
 void lexer::step_back(){first--;}
 
 void lexer::word(){
 	std::string str;
-	while(std::isalpha(*first) && *first != *last){
+	char prev = peek_back();
+	while(std::isalpha(*first) && !end()){
 		str += *first;
 		step();
 	}
@@ -66,6 +69,12 @@ void lexer::word(){
 	std::unordered_map<std::string, token_name>::iterator it = kw_table.find(str);
 	if(it != kw_table.end()){
 		tokens.push_back(token(it->second, it->first));
+	}
+	else if(prev == '\"'){
+		tokens.push_back(token(tok_string_literal, str));
+	}
+	else if(prev == '\''){
+		tokens.push_back(token(tok_character_literal, str));
 	}
 	else{
 		tokens.push_back(token(tok_identifier, str));
@@ -75,11 +84,17 @@ void lexer::word(){
 
 void lexer::number(){
 	std::string str;
-	while(std::isdigit(*first) && *first != *last){
+	while((std::isdigit(*first) || *first == '.') && !end()){
 		str += *first;
 		step();
 	}
-	tokens.push_back(token(tok_decimal_integer_literal, std::stoi(str)));
+
+	if(str.find('.') != std::string::npos){
+		tokens.push_back(token(tok_floating_point_literal, std::stod(str)));
+	}
+	else{
+		tokens.push_back(token(tok_decimal_integer_literal, std::stoi(str)));
+	}
 	step_back();
 }
 

@@ -34,7 +34,7 @@ std::string token::toString(){
 		case tok_op_not_bw:	return "<bitwise-operator:not>";
 
 		case tok_op_and:	return "<logical-operator:add>";
-		case tok_op_or:	return "<logical-operator:or>";
+		case tok_op_or:		return "<logical-operator:or>";
 		case tok_op_not:	return "<logical-operator:not>";
 		case tok_op_tilde:	return "<logical-operator:tilde>";
 
@@ -43,7 +43,15 @@ std::string token::toString(){
 
 		case tok_identifier:	return "<identifier:" + attr.name + ">";
 
-		case tok_decimal_integer_literal: return "<decimal_integer_literal:" + std::to_string(attr.value) + ">";
+		case tok_decimal_integer_literal: 	return "<decimal_integer_literal:" + std::to_string(attr.value) + ">";
+		case tok_hexadecimal_integer_literal: return "<hexadecimal_integer_literal:" + std::to_string(attr.value) + ">";
+		case tok_binary_integer_literal: 	return "<binary_integer_literal:" + std::to_string(attr.value) + ">";
+
+		case tok_floating_point_literal: 	return "<floating_point_literal:" + std::to_string(attr.floating) + ">";
+
+		case tok_string_literal:	return "<string_literal:" + attr.name + ">";
+
+		case tok_character_literal:	return "<character_literal:" + attr.name + ">";
 
 		case tok_kw_and: return "<keyword:" + attr.name + ">";
 		case tok_kw_or: return "<keyword:" + attr.name + ">";
@@ -60,6 +68,8 @@ std::string token::toString(){
 		case tok_kw_int: return "<keyword:" + attr.name + ">";
 		case tok_kw_float: return "<keyword:" + attr.name + ">";
 
+
+
 		default:	return "";
 	}
 }
@@ -72,4 +82,9 @@ token::token(const token_name n, std::string str){
 token::token(const token_name n, int value){
 	name = n;
 	attr = token_attribute(value);
+}
+
+token::token(const token_name n, double floating){
+	name = n;
+	attr = token_attribute(floating);
 }
