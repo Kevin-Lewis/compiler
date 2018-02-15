@@ -4,6 +4,10 @@
 #include <string>
 #include <iostream>
 
+static bool isHex(char c){
+	return std::isdigit(c) || c=='A' || c=='B' || c=='C' || c=='D' || c=='E' || c=='F';
+}
+
 void lexer::lex(){
 	if(first != last){
 		if(!std::isspace(*first)){
@@ -94,7 +98,7 @@ void lexer::number(){
 	std::string str;
 	char type = *(first - 1); //checks for binary or hex integer
 
-	while((std::isdigit(*first) || *first == '.') && !end()){
+	while((std::isdigit(*first) || *first == '.' || isHex(*first)) && !end()){
 		str += *first;
 		step();
 	}
@@ -104,14 +108,17 @@ void lexer::number(){
 	}
 	else{ //integer
 		if(type == 'b' || str[0] == 'B'){ //binary number
-			tokens.push_back(token(tok_binary_integer_literal, std::stoi(str)));
+			for(int i=0; i<str.size(); i++){if(str[i] != '0' && str[i] != '1'){throw std::runtime_error("binary literal contains invalid values");}}
+			tokens.push_back(token(tok_binary_integer_literal, std::stoi(str, 0, 2)));
 
 		}
 		else if(type == 'x' || str[0] == 'X'){ //hexadecimal number
-			tokens.push_back(token(tok_hexadecimal_integer_literal, std::stoi(str)));
+			for(int i=0; i<str.size(); i++){if(!(isHex(str[i]))){throw std::runtime_error("hexadecimal literal contains invalid values");}}
+			tokens.push_back(token(tok_hexadecimal_integer_literal, std::stoi(str, 0, 16)));
 
 		}
 		else{ //decimal number
+			for(int i=0; i<str.size(); i++){if(!(std::isdigit(str[i]))){throw std::runtime_error("decimal literal contains invalid values");}}
 			tokens.push_back(token(tok_decimal_integer_literal, std::stoi(str)));
 		}	
 	}
