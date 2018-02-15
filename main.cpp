@@ -15,13 +15,13 @@ int main(){
 
 	lexer l = lexer(str);
 
-	while(l.first != l.last){
+	while(!l.end()){
 		l.lex();
 	}
 
 	for(int i = 0; i < l.tokens.size(); i++){
 		std::cout << l.tokens[i].toString();
-		std::cout << std::endl;
+		if(i < l.tokens.size()-1){std::cout << std::endl;}
 	}
 
 	std::cout << std::endl;

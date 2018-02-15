@@ -8,6 +8,8 @@ void lexer::lex(){
 	if(first != last){
 		if(!std::isspace(*first)){
 			switch(*first){
+				case '#':	skip_comment(); 							break;
+
 				case '{':	tokens.push_back(token(tok_lbrace)); 		break;
 				case '}':	tokens.push_back(token(tok_rbrace)); 		break;
 				case '(':	tokens.push_back(token(tok_lparen)); 		break;
@@ -58,6 +60,9 @@ void lexer::step(){if(first != last){first++;}}
 
 void lexer::step_back(){first--;}
 
+void lexer::skip_comment(){while(*first != '\n'){step();}}
+
+
 void lexer::word(){
 	std::string str;
 	char prev = peek_back();
@@ -67,33 +72,48 @@ void lexer::word(){
 	}
 
 	std::unordered_map<std::string, token_name>::iterator it = kw_table.find(str);
-	if(it != kw_table.end()){
+	if(it != kw_table.end()){ //a keyword token is found
 		tokens.push_back(token(it->second, it->first));
 	}
-	else if(prev == '\"'){
+	else if(prev == '\"'){ //a string token is found
+		if(*first != '\"'){throw std::runtime_error("unterminated string literal");}
 		tokens.push_back(token(tok_string_literal, str));
 	}
-	else if(prev == '\''){
+	else if(prev == '\''){ //a character token is found
+		if(*first != '\''){throw std::runtime_error("unterminated string literal");}
+		if(str.size() > 1){throw std::runtime_error("invalid character literal");}
 		tokens.push_back(token(tok_character_literal, str));
 	}
-	else{
-		tokens.push_back(token(tok_identifier, str));
+	else{ //an identifier token is found
+		if(!std::isdigit(*first)){tokens.push_back(token(tok_identifier, str));}
 	}
 	step_back();
 }
 
 void lexer::number(){
 	std::string str;
+	char type = *(first - 1); //checks for binary or hex integer
+
 	while((std::isdigit(*first) || *first == '.') && !end()){
 		str += *first;
 		step();
 	}
 
-	if(str.find('.') != std::string::npos){
+	if(str.find('.') != std::string::npos){ //floating point number
 		tokens.push_back(token(tok_floating_point_literal, std::stod(str)));
 	}
-	else{
-		tokens.push_back(token(tok_decimal_integer_literal, std::stoi(str)));
+	else{ //integer
+		if(type == 'b' || str[0] == 'B'){ //binary number
+			tokens.push_back(token(tok_binary_integer_literal, std::stoi(str)));
+
+		}
+		else if(type == 'x' || str[0] == 'X'){ //hexadecimal number
+			tokens.push_back(token(tok_hexadecimal_integer_literal, std::stoi(str)));
+
+		}
+		else{ //decimal number
+			tokens.push_back(token(tok_decimal_integer_literal, std::stoi(str)));
+		}	
 	}
 	step_back();
 }
