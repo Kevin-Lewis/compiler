@@ -27,6 +27,9 @@ struct parser{
 	void parse_basic_type();
 	void parse_type_list();
 
+	//expression parsing
+	void parse_expression();
+
 	//returns the name of the current token
 	token_name lookahead(){return tokens.front().name;}
 

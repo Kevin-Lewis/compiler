@@ -22,6 +22,47 @@ void parser::match(token_name t){
 	else{throw std::runtime_error("Syntax error.");}
 }
 
-void parser::parse_type(){
+void parser::parse_type(){parse_postfix_type();}
 
+void parser::parse_postfix_type(){
+	parse_basic_type();
+	switch(lookahead()){
+		case tok_op_mul:
+			match(tok_op_mul);
+			break;
+		case tok_lbracket:
+			match(tok_lbracket);
+			if(lookahead() == tok_rbracket){match(tok_rbracket);}
+			else{parse_expression(); match(tok_rbracket);}
+			break;
+		default: break;
+	}
 }
+
+void parser::parse_reference_type(){
+	parse_postfix_type();
+	switch(lookahead()){
+		case tok_op_and_bw: match(tok_op_and_bw); break;
+		default: break;
+	}
+}
+void parser::parse_basic_type(){
+	switch(lookahead()){
+		case tok_kw_bool: match(tok_kw_bool); break;
+		case tok_kw_int: match(tok_kw_int); break;
+		case tok_kw_float: match(tok_kw_float); break;
+		case tok_kw_char: match(tok_kw_char); break;
+		case tok_lparen: 
+			match(tok_lparen);
+			parse_type_list();
+			match(tok_rparen);
+			break;
+		default: break;
+
+	}
+}
+void parser::parse_type_list(){
+	parse_type();
+}
+
+void parser::parse_expression(){}
