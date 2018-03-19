@@ -103,18 +103,28 @@ define i8* @string_cat(i8* %dest, i8* %src){
 		%pos = inttoptr i64 %charinc to i8*
 		%char = load i8, i8* %pos
 
-		%incalt = sub i64 %size, 1
-
 		%end = icmp eq i8 %char, 0
 		br i1 %end, label %Cat, label %Copy
 	Cat:
-		%size = phi i64 [%incalt, %Copy], [%inccat, %Cat]
-		%inccat = add i64 %sizecat, 1
-
-		%charstart = ptrtoint i8* %src to i64
-		%charinc = add i64 %charstart, %size
-		%pos = inttoptr i64 %charinc to i8*
-		%char = load i8, i8* %pos
+		%sizecat = phi i64 [%size, %Copy], [%inccat, %Cat]
+		%sizesrc = phi i64 [0, %Copy], [%incsrc, %Cat]
 		
+		%inccat = add i64 %sizecat, 1
+		%incsrc = add i64 %sizesrc, 1
 
+		%ocharstart = ptrtoint i8* %src to i64
+		%ocharinc = add i64 %ocharstart, %sizesrc
+		%opos = inttoptr i64 %ocharinc to i8*
+		%ochar = load i8, i8* %opos
+
+		%ncharstart = ptrtoint i8* %dest to i64
+		%ncharinc = add i64 %ncharstart, %sizecat
+		%npos = inttoptr i64 %ncharinc to i8*
+		store i8 %ochar, i8* %npos
+
+		%nend = icmp eq i8 %ochar, 0
+		br i1 %nend, label %Break, label %Cat
+	Break:
+		ret i8* %dest
+		
 }
