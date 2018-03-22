@@ -258,3 +258,78 @@ void parser::parse_expression_statement(){
 	parse_expression();
 	match(tok_semicolon);
 }
+
+//declaration parsing
+void parser::parse_program(){parse_declaration_seq();}
+void parser::parse_declaration_seq(){
+	parse_declaration();
+}
+void parser::parse_declaration(){
+	parse_object_definition();
+}
+void parser::parse_local_declaration(){parse_object_definition();}
+void parser::parse_object_definition(){
+	switch(lookahead()){
+		case tok_kw_var:
+			parse_variable_definition();
+			break;
+		case tok_kw_let:
+			parse_constant_definition();
+			break;
+		case tok_kw_def:
+			parse_value_definition();
+			break;
+		default:
+			break;
+	}
+}
+void parser::parse_variable_definition(){
+	match(tok_kw_var);
+	match(tok_identifier);
+	match(tok_colon);
+	parse_type();
+	if(lookahead() != tok_semicolon){
+		match(tok_op_assignment);
+		parse_expression();
+	}
+	match(tok_semicolon);
+}
+void parser::parse_constant_definition(){
+	match(tok_kw_let);
+	match(tok_identifier);
+	match(tok_colon);
+	parse_type();
+	match(tok_op_assignment);
+	parse_expression();
+	match(tok_semicolon);
+
+}
+void parser::parse_value_definition(){
+	match(tok_kw_def);
+	match(tok_identifier);
+	match(tok_colon);
+	parse_type();
+	match(tok_op_assignment);
+	parse_expression();
+	match(tok_semicolon);
+}
+void parser::parse_function_definition(){
+	match(tok_kw_def);
+	match(tok_identifier);
+	match(tok_lparen);
+	parse_parameter_list();
+	match(tok_rparen);
+	//TODO: Add arrow token
+}
+void parser::parse_parameter_list(){
+	parse_parameter();
+	while(lookahead() == tok_comma){
+		match(tok_comma);
+		parse_parameter();
+	}
+}
+void parser::parse_parameter(){
+	match(tok_identifier);
+	match(tok_colon);
+	parse_type();
+}

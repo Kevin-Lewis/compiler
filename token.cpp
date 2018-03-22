@@ -73,8 +73,6 @@ std::string token::toString(){
 		case tok_kw_while: return "<keyword:" + attr.name + ">";
 		case tok_kw_return: return "<keyword:" + attr.name + ">";
 
-
-
 		default:	return "";
 	}
 }
