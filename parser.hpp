@@ -49,6 +49,18 @@ struct parser{
 	void parse_assignment_expression();
 	void parse_constant_expresssion();
 
+	//statement parsing
+	void parse_statement();
+	void parse_block_statement();
+	void parse_statement_seq();
+	void parse_if_statement();
+	void parse_while_statement();
+	void parse_break_statement();
+	void parse_continue_statement();
+	void parse_return_statement();
+	void parse_declaration_statement();
+	void parse_expression_statement();
+
 	//returns the name of the current token
 	token_name lookahead(){return tokens.front().name;}
 

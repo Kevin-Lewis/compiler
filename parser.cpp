@@ -174,24 +174,24 @@ void parser::parse_bitwise_xor_expression(){
 	}
 }
 void parser::parse_bitwise_or_expression(){
-	parse_bitwise_xor_expression()
+	parse_bitwise_xor_expression();
 	while(lookahead()==tok_op_or_bw){
 		accept();
-		parse_bitwise_xor_expression()
+		parse_bitwise_xor_expression();
 	}
 }
 void parser::parse_logical_and_expression(){
-	parse_bitwise_or_expression()
+	parse_bitwise_or_expression();
 	while(lookahead()==tok_kw_and){
 		accept();
-		parse_bitwise_or_expression()
+		parse_bitwise_or_expression();
 	}
 }
 void parser::parse_logical_or_expression(){
-	parse_logical_and_expression()
+	parse_logical_and_expression();
 	while(lookahead()==tok_kw_or){
 		accept();
-		parse_logical_and_expression()
+		parse_logical_and_expression();
 	}
 }
 void parser::parse_conditional_expression(){
@@ -199,7 +199,7 @@ void parser::parse_conditional_expression(){
 	if(lookahead() == tok_op_question){
 		match(tok_op_question);
 		parse_expression();
-		match(tok_op_colon);
+		match(tok_colon);
 		parse_conditional_expression();
 
 	}
@@ -213,3 +213,48 @@ void parser::parse_assignment_expression(){
 }
 void parser::parse_constant_expresssion(){parse_conditional_expression();}
 
+//statement parsing
+void parser::parse_statement(){}
+void parser::parse_block_statement(){
+	if(lookahead() == tok_lbrace){
+		match(tok_lbrace);
+		parse_statement_seq();
+		match(tok_rbrace);
+	}
+}
+void parser::parse_statement_seq(){
+	parse_statement();
+	while(lookahead() != tok_rbrace){
+		parse_statement();
+	}
+}
+void parser::parse_if_statement(){
+	match(tok_kw_if);
+	match(tok_lparen);
+	parse_expression();
+	match(tok_rparen);
+	parse_statement();
+	if(lookahead() == tok_kw_else){
+		match(tok_kw_else);
+		parse_statement();
+	}
+}
+void parser::parse_while_statement(){
+	match(tok_kw_while);
+	match(tok_lparen);
+	parse_expression();
+	match(tok_rparen);
+	parse_statement();
+}
+//void parser::parse_break_statement(){break;}
+//void parser::parse_continue_statement(){continue;}
+void parser::parse_return_statement(){
+	match(tok_kw_return);
+	if(lookahead() != tok_semicolon){parse_expression();}
+	match(tok_semicolon);
+}
+//void parser::parse_declaration_statement(){parse_local_declaration();}
+void parser::parse_expression_statement(){
+	parse_expression();
+	match(tok_semicolon);
+}

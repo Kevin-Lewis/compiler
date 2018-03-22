@@ -143,4 +143,7 @@ void lexer::initialize_keytable(){
 	kw_table.insert({"void",tok_kw_void});
 	kw_table.insert({"const",tok_kw_const});
 	kw_table.insert({"as",tok_kw_as});
+	kw_table.insert({"while",tok_kw_while});
+	kw_table.insert({"return",tok_kw_return});
+
 }

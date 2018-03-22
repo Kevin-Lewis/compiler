@@ -64,6 +64,8 @@ enum token_name{
 	tok_kw_void,
 	tok_kw_const,
 	tok_kw_as,
+	tok_kw_while,
+	tok_kw_return,
 
 	//identifier
 	tok_identifier,
