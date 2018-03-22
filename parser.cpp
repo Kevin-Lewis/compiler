@@ -1,4 +1,5 @@
 #include "parser.hpp"
+#include <iostream>
 
 void parser::initialize_keytable(){
 	kw_table.insert({"and",tok_kw_and});
@@ -214,7 +215,25 @@ void parser::parse_assignment_expression(){
 void parser::parse_constant_expresssion(){parse_conditional_expression();}
 
 //statement parsing
-void parser::parse_statement(){}
+void parser::parse_statement(){
+	switch(lookahead()){
+		case tok_lbrace:
+			parse_block_statement();
+			break;
+		case tok_kw_if:
+			parse_if_statement();
+			break;
+		case tok_kw_while:
+			parse_while_statement();
+			break;
+		case tok_kw_return:
+			parse_return_statement();
+			break;
+		default:
+			break;
+		//TODO: Add break and continue tokens
+	}
+}
 void parser::parse_block_statement(){
 	if(lookahead() == tok_lbrace){
 		match(tok_lbrace);
@@ -260,7 +279,13 @@ void parser::parse_expression_statement(){
 }
 
 //declaration parsing
-void parser::parse_program(){parse_declaration_seq();}
+void parser::parse_program(){
+	std::cout << tokens.size();
+	while(!tokens.empty()){
+		//std::cout << "TEST";
+		parse_declaration_seq();
+	}
+}
 void parser::parse_declaration_seq(){
 	parse_declaration();
 }

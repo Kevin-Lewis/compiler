@@ -4,6 +4,7 @@
 #include <fstream>
 
 #include "lexer.hpp"
+#include "parser.hpp"
 
 int main(){
 
@@ -14,10 +15,13 @@ int main(){
 	std::string str = buffer.str();
 
 	lexer l = lexer(str);
-
+	
 	while(!l.end()){
 		l.lex();
 	}
+
+	parser p = parser(l.tokens);
+	p.parse_program();
 
 	for(int i = 0; i < l.tokens.size(); i++){
 		std::cout << l.tokens[i].toString();
