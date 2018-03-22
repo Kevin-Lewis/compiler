@@ -18,7 +18,10 @@ struct lexer{
 	std::unordered_map<std::string, token_name> kw_table;
 
 	//constructs a lexer object given a reference to a string
-	lexer(const std::string& str) : first(str.data()), last(first + str.size()){}
+	lexer(const std::string& str) : first(str.data()), last(first + str.size()){initialize_keytable();}
+
+	//create keyword table
+	void initialize_keytable();
 
 	//lex a file
 	void lex();

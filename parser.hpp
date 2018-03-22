@@ -29,6 +29,25 @@ struct parser{
 
 	//expression parsing
 	void parse_expression();
+	void parse_primary_expression();
+	void parse_postfix_expression();
+	void parse_argument_list();
+	void parse_argument();
+	void parse_unary_expression();
+	void parse_cast_expression();
+	void parse_multiplicative_expression();
+	void parse_additive_expression();
+	void parse_shift_expression();
+	void parse_relational_expression();
+	void parse_equality_expression();
+	void parse_bitwise_and_expression();
+	void parse_bitwise_xor_expression();
+	void parse_bitwise_or_expression();
+	void parse_logical_and_expression();
+	void parse_logical_or_expression();
+	void parse_conditional_expression();
+	void parse_assignment_expression();
+	void parse_constant_expresssion();
 
 	//returns the name of the current token
 	token_name lookahead(){return tokens.front().name;}

@@ -67,6 +67,9 @@ std::string token::toString(){
 		case tok_kw_def: return "<keyword:" + attr.name + ">";
 		case tok_kw_int: return "<keyword:" + attr.name + ">";
 		case tok_kw_float: return "<keyword:" + attr.name + ">";
+		case tok_kw_void: return "<keyword:" + attr.name + ">";
+		case tok_kw_const: return "<keyword:" + attr.name + ">";
+		case tok_kw_as: return "<keyword:" + attr.name + ">";
 
 
 

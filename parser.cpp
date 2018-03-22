@@ -65,4 +65,151 @@ void parser::parse_type_list(){
 	parse_type();
 }
 
-void parser::parse_expression(){}
+
+//Expression Parsing
+void parser::parse_expression(){parse_assignment_expression();}
+
+void parser::parse_primary_expression(){
+	switch(lookahead()){
+		case tok_lparen: match(tok_lparen); parse_expression(); match(tok_rparen); break;
+		case tok_decimal_integer_literal: match(tok_decimal_integer_literal); break;
+		case tok_hexadecimal_integer_literal: match(tok_hexadecimal_integer_literal); break;
+		case tok_binary_integer_literal: match(tok_binary_integer_literal); break;
+		case tok_floating_point_literal: match(tok_floating_point_literal); break;
+		case tok_boolean_literal: match(tok_boolean_literal); break;
+		case tok_character_literal: match(tok_character_literal); break;
+		case tok_string_literal: match(tok_string_literal); break;
+		case tok_identifier: match(tok_identifier); break;
+		default: break;
+	}
+}
+void parser::parse_postfix_expression(){
+	parse_primary_expression();
+	switch(lookahead()){
+		case tok_lparen:
+			parse_argument_list();
+			match(tok_rparen);
+			break;
+		case tok_lbracket:
+			parse_argument_list();
+			match(tok_rbracket);
+			break;
+		default: 
+			break;
+	}
+}
+void parser::parse_argument_list(){
+	parse_argument();
+	while(lookahead() == tok_comma){
+		parse_argument();
+	}
+}
+void parser::parse_argument(){parse_expression();}
+void parser::parse_unary_expression(){
+	switch(lookahead()){
+		case tok_op_plus: match(tok_op_plus); break;
+		case tok_op_minus: match(tok_op_minus); break;
+		case tok_op_not_bw: match(tok_op_not_bw); break;
+		case tok_op_and_bw: match(tok_op_and_bw); break;
+		case tok_op_mul: match(tok_op_mul); break;
+		default: break;
+	}
+	parse_postfix_expression();
+}
+void parser::parse_cast_expression(){
+	parse_unary_expression();
+	while(lookahead() == tok_kw_as){
+		match(tok_kw_as); 
+		parse_unary_expression();
+	}
+}
+void parser::parse_multiplicative_expression(){
+	parse_cast_expression();
+	while(lookahead()==tok_op_mul || lookahead()==tok_op_div || lookahead()==tok_op_mod){
+		accept();
+		parse_cast_expression();
+	}
+}
+void parser::parse_additive_expression(){
+	parse_multiplicative_expression();
+	while(lookahead()==tok_op_plus || lookahead()==tok_op_minus){
+		accept();
+		parse_multiplicative_expression();
+	}
+}
+void parser::parse_shift_expression(){
+	parse_additive_expression();
+	//TODO - add shift operators
+	while(lookahead()==tok_op_plus || lookahead()==tok_op_minus){
+		accept();
+		parse_additive_expression();
+	}
+}
+void parser::parse_relational_expression(){
+	parse_shift_expression();
+	while(lookahead()==tok_op_gt || lookahead()==tok_op_lt || lookahead()==tok_op_gte || lookahead() == tok_op_lte){
+		accept();
+		parse_shift_expression();
+	}
+}
+void parser::parse_equality_expression(){
+	parse_relational_expression();
+	while(lookahead()==tok_op_eq || lookahead()==tok_op_neq){
+		accept();
+		parse_relational_expression();
+	}
+}
+void parser::parse_bitwise_and_expression(){
+	parse_relational_expression();
+	while(lookahead()==tok_op_and_bw){
+		accept();
+		parse_relational_expression();
+	}
+}
+void parser::parse_bitwise_xor_expression(){
+	parse_bitwise_and_expression();
+	while(lookahead()==tok_op_xor_bw){
+		accept();
+		parse_bitwise_and_expression();
+	}
+}
+void parser::parse_bitwise_or_expression(){
+	parse_bitwise_xor_expression()
+	while(lookahead()==tok_op_or_bw){
+		accept();
+		parse_bitwise_xor_expression()
+	}
+}
+void parser::parse_logical_and_expression(){
+	parse_bitwise_or_expression()
+	while(lookahead()==tok_kw_and){
+		accept();
+		parse_bitwise_or_expression()
+	}
+}
+void parser::parse_logical_or_expression(){
+	parse_logical_and_expression()
+	while(lookahead()==tok_kw_or){
+		accept();
+		parse_logical_and_expression()
+	}
+}
+void parser::parse_conditional_expression(){
+	parse_logical_or_expression();
+	if(lookahead() == tok_op_question){
+		match(tok_op_question);
+		parse_expression();
+		match(tok_op_colon);
+		parse_conditional_expression();
+
+	}
+}
+void parser::parse_assignment_expression(){
+	parse_conditional_expression();
+	if(lookahead() == tok_op_assignment){
+		match(tok_op_assignment);
+		parse_assignment_expression();
+	}
+}
+void parser::parse_constant_expresssion(){parse_conditional_expression();}
+

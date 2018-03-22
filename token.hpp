@@ -61,6 +61,9 @@ enum token_name{
 	tok_kw_def,
 	tok_kw_int,
 	tok_kw_float,
+	tok_kw_void,
+	tok_kw_const,
+	tok_kw_as,
 
 	//identifier
 	tok_identifier,
@@ -74,7 +77,7 @@ enum token_name{
 	tok_floating_point_literal,
 
 	//boolean literals
-	boolean_literal,
+	tok_boolean_literal,
 
 	//character literal
 	tok_character_literal,
