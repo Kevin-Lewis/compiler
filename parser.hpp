@@ -76,6 +76,7 @@ struct parser{
 
 	//returns the name of the current token
 	token_name lookahead(){return tokens.front().name;}
+	token_name lookahead(int x){return tokens[x].name;}
 
 	//tries to match a token to the lookahead token
 	void match(token_name t);
