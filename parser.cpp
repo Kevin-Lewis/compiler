@@ -1,4 +1,7 @@
+#pragma once
+
 #include "parser.hpp"
+
 #include <iostream>
 
 void parser::initialize_keytable(){
@@ -23,9 +26,9 @@ void parser::match(token_name t){
 	else{throw std::runtime_error("Syntax error.");}
 }
 
-void parser::parse_type(){std::cout << "TYPE-"; parse_postfix_type();}
+type* parser::parse_type(){std::cout << "TYPE-"; parse_postfix_type();}
 
-void parser::parse_postfix_type(){
+type* parser::parse_postfix_type(){
 	std::cout << "PFIXTYPE-";
 	parse_basic_type();
 	switch(lookahead()){
@@ -41,7 +44,7 @@ void parser::parse_postfix_type(){
 	}
 }
 
-void parser::parse_reference_type(){
+type* parser::parse_reference_type(){
 	std::cout << "REFTYPE-";
 	parse_postfix_type();
 	switch(lookahead()){
@@ -49,7 +52,7 @@ void parser::parse_reference_type(){
 		default: break;
 	}
 }
-void parser::parse_basic_type(){
+type* parser::parse_basic_type(){
 	std::cout << "BASICTYPE-";
 	switch(lookahead()){
 		case tok_kw_bool: match(tok_kw_bool); break;
@@ -65,16 +68,16 @@ void parser::parse_basic_type(){
 
 	}
 }
-void parser::parse_type_list(){
+type* parser::parse_type_list(){
 	std::cout << "TYPELIST-";
 	parse_type();
 }
 
 
 //Expression Parsing
-void parser::parse_expression(){std::cout << "EXPRESSION-"; parse_assignment_expression();}
+expression* parser::parse_expression(){std::cout << "EXPRESSION-"; parse_assignment_expression();}
 
-void parser::parse_primary_expression(){
+expression* parser::parse_primary_expression(){
 	std::cout << "PRIMARYEXPR-";
 	switch(lookahead()){
 		case tok_lparen: match(tok_lparen); parse_expression(); match(tok_rparen); break;
@@ -89,7 +92,7 @@ void parser::parse_primary_expression(){
 		default: break;
 	}
 }
-void parser::parse_postfix_expression(){
+expression* parser::parse_postfix_expression(){
 	std::cout << "PFIXEXPR-";
 	parse_primary_expression();
 	switch(lookahead()){
@@ -105,15 +108,15 @@ void parser::parse_postfix_expression(){
 			break;
 	}
 }
-void parser::parse_argument_list(){
+expression* parser::parse_argument_list(){
 	std::cout << "ARGLIST-";
 	parse_argument();
 	while(lookahead() == tok_comma){
 		parse_argument();
 	}
 }
-void parser::parse_argument(){std::cout << "ARGUMENT-"; parse_expression();}
-void parser::parse_unary_expression(){
+expression* parser::parse_argument(){std::cout << "ARGUMENT-"; parse_expression();}
+expression* parser::parse_unary_expression(){
 	std::cout << "UNARYEXPR-";
 	switch(lookahead()){
 		case tok_op_plus: match(tok_op_plus); break;
@@ -125,7 +128,7 @@ void parser::parse_unary_expression(){
 	}
 	parse_postfix_expression();
 }
-void parser::parse_cast_expression(){
+expression* parser::parse_cast_expression(){
 	std::cout << "CASTEXPR-";
 	parse_unary_expression();
 	while(lookahead() == tok_kw_as){
@@ -133,7 +136,7 @@ void parser::parse_cast_expression(){
 		parse_unary_expression();
 	}
 }
-void parser::parse_multiplicative_expression(){
+expression* parser::parse_multiplicative_expression(){
 	std::cout << "MULTEXPR-";
 	parse_cast_expression();
 	while(lookahead()==tok_op_mul || lookahead()==tok_op_div || lookahead()==tok_op_mod){
@@ -141,7 +144,7 @@ void parser::parse_multiplicative_expression(){
 		parse_cast_expression();
 	}
 }
-void parser::parse_additive_expression(){
+expression* parser::parse_additive_expression(){
 	std::cout << "ADDEXPR-";
 	parse_multiplicative_expression();
 	while(lookahead()==tok_op_plus || lookahead()==tok_op_minus){
@@ -149,7 +152,7 @@ void parser::parse_additive_expression(){
 		parse_multiplicative_expression();
 	}
 }
-void parser::parse_shift_expression(){
+expression* parser::parse_shift_expression(){
 	std::cout << "SHIFTEXPR-";
 	parse_additive_expression();
 	//TODO - add shift operators
@@ -158,7 +161,7 @@ void parser::parse_shift_expression(){
 		parse_additive_expression();
 	}
 }
-void parser::parse_relational_expression(){
+expression* parser::parse_relational_expression(){
 	std::cout << "RELATEXPR-";
 	parse_shift_expression();
 	while(lookahead()==tok_op_gt || lookahead()==tok_op_lt || lookahead()==tok_op_gte || lookahead() == tok_op_lte){
@@ -166,7 +169,7 @@ void parser::parse_relational_expression(){
 		parse_shift_expression();
 	}
 }
-void parser::parse_equality_expression(){
+expression* parser::parse_equality_expression(){
 	std::cout << "EQUALITYEXPR-";
 	parse_relational_expression();
 	while(lookahead()==tok_op_eq || lookahead()==tok_op_neq){
@@ -174,7 +177,7 @@ void parser::parse_equality_expression(){
 		parse_relational_expression();
 	}
 }
-void parser::parse_bitwise_and_expression(){
+expression* parser::parse_bitwise_and_expression(){
 	std::cout << "BITWISEEXPR-";
 	parse_relational_expression();
 	while(lookahead()==tok_op_and_bw){
@@ -182,7 +185,7 @@ void parser::parse_bitwise_and_expression(){
 		parse_relational_expression();
 	}
 }
-void parser::parse_bitwise_xor_expression(){
+expression* parser::parse_bitwise_xor_expression(){
 	std::cout << "BXOREXPR-";
 	parse_bitwise_and_expression();
 	while(lookahead()==tok_op_xor_bw){
@@ -190,7 +193,7 @@ void parser::parse_bitwise_xor_expression(){
 		parse_bitwise_and_expression();
 	}
 }
-void parser::parse_bitwise_or_expression(){
+expression* parser::parse_bitwise_or_expression(){
 	std::cout << "BOREXPR-";
 	parse_bitwise_xor_expression();
 	while(lookahead()==tok_op_or_bw){
@@ -198,7 +201,7 @@ void parser::parse_bitwise_or_expression(){
 		parse_bitwise_xor_expression();
 	}
 }
-void parser::parse_logical_and_expression(){
+expression* parser::parse_logical_and_expression(){
 	std::cout << "LANDEXPR-";
 	parse_bitwise_or_expression();
 	while(lookahead()==tok_kw_and){
@@ -206,7 +209,7 @@ void parser::parse_logical_and_expression(){
 		parse_bitwise_or_expression();
 	}
 }
-void parser::parse_logical_or_expression(){
+expression* parser::parse_logical_or_expression(){
 	std::cout << "LOREXPR-";
 	parse_logical_and_expression();
 	while(lookahead()==tok_kw_or){
@@ -214,7 +217,7 @@ void parser::parse_logical_or_expression(){
 		parse_logical_and_expression();
 	}
 }
-void parser::parse_conditional_expression(){
+expression* parser::parse_conditional_expression(){
 	std::cout << "CONDITIONALEXPR-";
 	parse_logical_or_expression();
 	if(lookahead() == tok_op_question){
@@ -225,7 +228,7 @@ void parser::parse_conditional_expression(){
 
 	}
 }
-void parser::parse_assignment_expression(){
+expression* parser::parse_assignment_expression(){
 	std::cout << "ASSIGNMENTEXPR-";
 	parse_conditional_expression();
 	if(lookahead() == tok_op_assignment){
@@ -233,10 +236,10 @@ void parser::parse_assignment_expression(){
 		parse_assignment_expression();
 	}
 }
-void parser::parse_constant_expresssion(){std::cout << "CONSTEXPR-"; parse_conditional_expression();}
+expression* parser::parse_constant_expresssion(){std::cout << "CONSTEXPR-"; parse_conditional_expression();}
 
 //statement parsing
-void parser::parse_statement(){
+statement* parser::parse_statement(){
 	std::cout << "PARSESTMT-";
 	switch(lookahead()){
 		case tok_lbrace:
@@ -256,7 +259,7 @@ void parser::parse_statement(){
 		//TODO: Add break and continue tokens
 	}
 }
-void parser::parse_block_statement(){
+statement* parser::parse_block_statement(){
 	std::cout << "BLOCKSTMT-";
 	if(lookahead() == tok_lbrace){
 		match(tok_lbrace);
@@ -264,14 +267,14 @@ void parser::parse_block_statement(){
 		match(tok_rbrace);
 	}
 }
-void parser::parse_statement_seq(){
+statement* parser::parse_statement_seq(){
 	std::cout << "STMTSEQ-";
 	parse_statement();
 	while(lookahead() != tok_rbrace){
 		parse_statement();
 	}
 }
-void parser::parse_if_statement(){
+statement* parser::parse_if_statement(){
 	std::cout << "IFSTMT-";
 	match(tok_kw_if);
 	match(tok_lparen);
@@ -283,7 +286,7 @@ void parser::parse_if_statement(){
 		parse_statement();
 	}
 }
-void parser::parse_while_statement(){
+statement* parser::parse_while_statement(){
 	std::cout << "WHILESTMT-";
 	match(tok_kw_while);
 	match(tok_lparen);
@@ -291,33 +294,33 @@ void parser::parse_while_statement(){
 	match(tok_rparen);
 	parse_statement();
 }
-//void parser::parse_break_statement(){break;}
-//void parser::parse_continue_statement(){continue;}
-void parser::parse_return_statement(){
+//statement* parser::parse_break_statement(){break;}
+//statement* parser::parse_continue_statement(){continue;}
+statement* parser::parse_return_statement(){
 	std::cout << "RETURNSTMT-";
 	match(tok_kw_return);
 	if(lookahead() != tok_semicolon){parse_expression();}
 	match(tok_semicolon);
 }
-//void parser::parse_declaration_statement(){parse_local_declaration();}
-void parser::parse_expression_statement(){
+//statement* parser::parse_declaration_statement(){parse_local_declaration();}
+statement* parser::parse_expression_statement(){
 	std::cout << "EXPRSTMT-";
 	parse_expression();
 	match(tok_semicolon);
 }
 
 //declaration parsing
-void parser::parse_program(){
+declaration* parser::parse_program(){
 	std::cout << "PROGRAM-";
 	while(!tokens.empty()){
 		parse_declaration_seq();
 	}
 }
-void parser::parse_declaration_seq(){
+declaration* parser::parse_declaration_seq(){
 	std::cout << "DECLARATIONSEQ-";
 	parse_declaration();
 }
-void parser::parse_declaration(){
+declaration* parser::parse_declaration(){
 	std::cout << "DECLARATION-";
 	switch(lookahead(2)){
 		case tok_colon:
@@ -330,8 +333,8 @@ void parser::parse_declaration(){
 			break;
 	}
 }
-void parser::parse_local_declaration(){std::cout << "LOCALDEC-"; parse_object_definition();}
-void parser::parse_object_definition(){
+declaration* parser::parse_local_declaration(){std::cout << "LOCALDEC-"; parse_object_definition();}
+declaration* parser::parse_object_definition(){
 	std::cout << "OBJECTDEF-";
 	switch(lookahead()){
 		case tok_kw_var:
@@ -347,7 +350,7 @@ void parser::parse_object_definition(){
 			break;
 	}
 }
-void parser::parse_variable_definition(){
+declaration* parser::parse_variable_definition(){
 	std::cout << "VARIABLEDEF-";
 	match(tok_kw_var);
 	match(tok_identifier);
@@ -359,7 +362,7 @@ void parser::parse_variable_definition(){
 	}
 	match(tok_semicolon);
 }
-void parser::parse_constant_definition(){
+declaration* parser::parse_constant_definition(){
 	std::cout << "CONSTANTDEF-";
 	match(tok_kw_let);
 	match(tok_identifier);
@@ -370,7 +373,7 @@ void parser::parse_constant_definition(){
 	match(tok_semicolon);
 
 }
-void parser::parse_value_definition(){
+declaration* parser::parse_value_definition(){
 	std::cout << "VALUEDEF-";
 	match(tok_kw_def);
 	match(tok_identifier);
@@ -380,7 +383,7 @@ void parser::parse_value_definition(){
 	parse_expression();
 	match(tok_semicolon);
 }
-void parser::parse_function_definition(){
+declaration* parser::parse_function_definition(){
 	std::cout << "FUNCTIONDEF-";
 	match(tok_kw_def);
 	match(tok_identifier);
@@ -390,7 +393,7 @@ void parser::parse_function_definition(){
 	parse_block_statement();
 	//TODO: Add arrow token
 }
-void parser::parse_parameter_list(){
+declaration* parser::parse_parameter_list(){
 	std::cout << "PARAMLIST-";
 	parse_parameter();
 	while(lookahead() == tok_comma){
@@ -398,7 +401,7 @@ void parser::parse_parameter_list(){
 		parse_parameter();
 	}
 }
-void parser::parse_parameter(){
+declaration* parser::parse_parameter(){
 	std::cout << "PARSEPARAM-";
 	match(tok_identifier);
 	match(tok_colon);
