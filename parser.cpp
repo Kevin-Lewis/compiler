@@ -1,4 +1,5 @@
 #include "parser.hpp"
+#include "scope.hpp"
 
 #include <iostream>
 #include <string>
