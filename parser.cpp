@@ -301,23 +301,25 @@ expression* parser::parse_constant_expresssion(){return parse_conditional_expres
 
 //statement parsing
 statement* parser::parse_statement(){
+	statement* s;
 	switch(lookahead()){
 		case tok_lbrace:
-			return parse_block_statement();
+			s = parse_block_statement();
 			break;
 		case tok_kw_if:
-			return parse_if_statement();
+			s = parse_if_statement();
 			break;
 		case tok_kw_while:
-			return parse_while_statement();
+			s = parse_while_statement();
 			break;
 		case tok_kw_return:
-			return parse_return_statement();
+			s = parse_return_statement();
 			break;
 		default:
 			break;
 		//TODO: Add break and continue tokens
 	}
+	return s;
 }
 statement* parser::parse_block_statement(){
 	std::vector<statement*> ss;
@@ -372,89 +374,111 @@ statement* parser::parse_expression_statement(){
 
 //declaration parsing
 declaration* parser::parse_program(){
+	declaration* d;
 	while(!tokens.empty()){
-		parse_declaration_seq();
+		d = parse_declaration_seq();
 	}
+	return d;
 }
 declaration* parser::parse_declaration_seq(){
-	parse_declaration();
+	//TODO - Acually parse declaration sequence
+	declaration* d = parse_declaration();
+	return d;
 }
 declaration* parser::parse_declaration(){
+	declaration* d;
 	switch(lookahead(2)){
 		case tok_colon:
-			return parse_object_definition();
+			d = parse_object_definition();
 			break;
 		case tok_lparen:
-			return parse_function_definition();
+			d = parse_function_definition();
 			break;
 		default:
 			break;
 	}
+	return d;
 }
 declaration* parser::parse_local_declaration(){return parse_object_definition();}
 declaration* parser::parse_object_definition(){
+	declaration* d = nullptr;
 	switch(lookahead()){
 		case tok_kw_var:
-			parse_variable_definition();
+			d = parse_variable_definition();
 			break;
 		case tok_kw_let:
-			parse_constant_definition();
+			d = parse_constant_definition();
 			break;
 		case tok_kw_def:
-			parse_value_definition();
+			d = parse_value_definition();
 			break;
 		default:
 			break;
 	}
+	return d;
 }
 declaration* parser::parse_variable_definition(){
+	expression* e = nullptr;
 	match(tok_kw_var);
+	token tok = tokens.front();
 	match(tok_identifier);
 	match(tok_colon);
-	parse_type();
+	type* t = parse_type();
 	if(lookahead() != tok_semicolon){
 		match(tok_op_assignment);
-		parse_expression();
+		e = parse_expression();
 	}
 	match(tok_semicolon);
+	return new var_declaration(tok.attr.name,t,e);
 }
 declaration* parser::parse_constant_definition(){
 	match(tok_kw_let);
+	token tok = tokens.front();
 	match(tok_identifier);
 	match(tok_colon);
-	parse_type();
+	type* t = parse_type();
 	match(tok_op_assignment);
-	parse_expression();
+	expression* e = parse_expression();
 	match(tok_semicolon);
-
+	return new const_declaration(tok.attr.name,t,e);
 }
 declaration* parser::parse_value_definition(){
 	match(tok_kw_def);
+	token tok = tokens.front();
 	match(tok_identifier);
 	match(tok_colon);
-	parse_type();
+	type* t = parse_type();
 	match(tok_op_assignment);
-	parse_expression();
+	expression* e = parse_expression();
 	match(tok_semicolon);
+	return new value_declaration(tok.attr.name,t,e);
 }
 declaration* parser::parse_function_definition(){
 	match(tok_kw_def);
+	token tok = tokens.front();
 	match(tok_identifier);
 	match(tok_lparen);
-	parse_parameter_list();
+	std::vector<declaration*> decs = parse_parameter_list();
 	match(tok_rparen);
-	parse_block_statement();
+	statement* s = parse_block_statement();
 	//TODO: Add arrow token
+	type* t = parse_type();
+	return new func_declaration(tok.attr.name,t,decs,s);
 }
-declaration* parser::parse_parameter_list(){
-	parse_parameter();
+std::vector<declaration*> parser::parse_parameter_list(){
+	declaration* d;
+	d -> d_list.push_back(parse_parameter());
 	while(lookahead() == tok_comma){
 		match(tok_comma);
-		parse_parameter();
+		d -> d_list.push_back(parse_parameter());
 	}
+	return d -> d_list;
+
 }
 declaration* parser::parse_parameter(){
+	token tok = tokens.front();
 	match(tok_identifier);
 	match(tok_colon);
-	parse_type();
+	type* t = parse_type();
+	return new param_declaration(tok.attr.name,t);
 }

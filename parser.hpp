@@ -80,7 +80,7 @@ struct parser{
 	declaration* parse_constant_definition();
 	declaration* parse_value_definition();
 	declaration* parse_function_definition();
-	declaration* parse_parameter_list();
+	std::vector<declaration*> parse_parameter_list();
 	declaration* parse_parameter();
 
 	//returns the name of the current token
