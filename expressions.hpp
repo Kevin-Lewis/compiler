@@ -12,11 +12,6 @@ struct expression{
 		u_not_kind,
 		u_ref_kind,
 		u_mul_kind,
-		mul_kind,
-		add_kind,
-		shift_kind,
-		rel_kind,
-		eq_kind,
 		bw_and_kind,
 		bw_xor_kind,
 		bw_or_kind,
@@ -26,8 +21,13 @@ struct expression{
 		int_kind,
 		float_kind,
 		id_kind,
-		char_kind
-
+		char_kind,
+		b_add_kind,
+		b_sub_kind,
+		b_mul_kind,
+		b_shift_kind,
+		b_rel_kind,
+		b_eq_kind
 	};
 
 	expression(kind k) : k(k), t(){}
@@ -49,4 +49,81 @@ struct u_not_expression : expression{u_not_expression(expression* e) : expressio
 struct u_ref_expression : expression{u_ref_expression(expression* e) : expression(u_ref_kind), e(e){} expression* e;};
 struct u_mul_expression : expression{u_mul_expression(expression* e) : expression(u_mul_kind), e(e){} expression* e;};
 
-struct cast_expression : expression{cast_expression(expression* e, type* t) : expression(cast_kind, t), e(e), t(t){} expression* e; type* t;};
+struct cast_expression : expression{
+	cast_expression(expression* e, type* t) : expression(cast_kind, t), e(e), t(t){} 
+	expression* e; 
+	type* t;
+};
+
+struct b_mul_expression : expression{
+	b_mul_expression(type*t, expression* e1, expression* e2) : expression(b_mul_kind, t), left(e1), right(e2){}
+	expression* left;
+	expression* right;
+};
+
+struct b_add_expression : expression{
+	b_add_expression(type*t, expression* e1, expression* e2) : expression(b_add_kind, t), left(e1), right(e2){}
+	expression* left;
+	expression* right;
+};
+
+struct b_shift_expression : expression{
+	b_shift_expression(type*t, expression* e1, expression* e2) : expression(b_shift_kind, t), left(e1), right(e2){}
+	expression* left;
+	expression* right;
+};
+
+struct b_rel_expression : expression{
+	b_rel_expression(type*t, expression* e1, expression* e2) : expression(b_shift_kind, t), left(e1), right(e2){}
+	expression* left;
+	expression* right;
+};
+
+struct b_eq_expression : expression{
+	b_eq_expression(type*t, expression* e1, expression* e2) : expression(b_eq_kind, t), left(e1), right(e2){}
+	expression* left;
+	expression* right;
+};
+
+struct bw_and_expression : expression{
+	bw_and_expression(type*t, expression* e1, expression* e2) : expression(bw_and_kind, t), left(e1), right(e2){}
+	expression* left;
+	expression* right;
+};
+
+struct bw_or_expression : expression{
+	bw_or_expression(type*t, expression* e1, expression* e2) : expression(bw_or_kind, t), left(e1), right(e2){}
+	expression* left;
+	expression* right;
+};
+
+struct bw_xor_expression : expression{
+	bw_xor_expression(type*t, expression* e1, expression* e2) : expression(bw_xor_kind, t), left(e1), right(e2){}
+	expression* left;
+	expression* right;
+};
+
+struct and_expression : expression{
+	and_expression(type*t, expression* e1, expression* e2) : expression(and_kind, t), left(e1), right(e2){}
+	expression* left;
+	expression* right;
+};
+
+struct or_expression : expression{
+	or_expression(type*t, expression* e1, expression* e2) : expression(or_kind, t), left(e1), right(e2){}
+	expression* left;
+	expression* right;
+};
+
+struct conditional_expression : expression{
+	conditional_expression(type*t, expression* e1, expression* e2, expression* e3) : expression(cond_kind, t), cond(e1), t(e2), f(e3){}
+	expression* cond;
+	expression* t;
+	expression* f;
+};
+
+struct assignment_expression : expression{
+assignment_expression(type*t, expression* e1, expression* e2) : expression(assign_kind, t), left(e1), right(e2){}
+	expression* left;
+	expression* right;
+};

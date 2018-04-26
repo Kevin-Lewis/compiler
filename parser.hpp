@@ -6,9 +6,11 @@
 #include "expressions.hpp"
 #include "statements.hpp"
 #include "declarations.hpp"
+#include "translate.hpp"
 
 #include <cassert>
 #include <deque>
+#include <vector>
 
 struct parser{
 
@@ -20,6 +22,9 @@ struct parser{
 
 	//keyword table
 	std::unordered_map<std::string, token_name> kw_table;
+
+	//
+	translate translator;
 
 	//create keyword table
 	void initialize_keytable();
@@ -56,7 +61,7 @@ struct parser{
 	//statement parsing
 	statement* parse_statement();
 	statement* parse_block_statement();
-	statement* parse_statement_seq();
+	std::vector<statement*> parse_statement_seq();
 	statement* parse_if_statement();
 	statement* parse_while_statement();
 	statement* parse_break_statement();

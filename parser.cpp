@@ -1,9 +1,8 @@
-#pragma once
-
 #include "parser.hpp"
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 void parser::initialize_keytable(){
 	kw_table.insert({"and",tok_kw_and});
@@ -188,92 +187,115 @@ expression* parser::parse_cast_expression(){
 	return e;
 }
 expression* parser::parse_multiplicative_expression(){
-	parse_cast_expression();
+	expression* e1 = parse_cast_expression();
 	while(lookahead()==tok_op_mul || lookahead()==tok_op_div || lookahead()==tok_op_mod){
 		accept();
-		parse_cast_expression();
+		expression* e2 = parse_cast_expression();
+		e1 = new b_mul_expression(e1->t,e1,e2);
 	}
+	return e1;
 }
 expression* parser::parse_additive_expression(){
-	parse_multiplicative_expression();
+	expression* e1 = parse_multiplicative_expression();
 	while(lookahead()==tok_op_plus || lookahead()==tok_op_minus){
 		accept();
-		parse_multiplicative_expression();
+		expression* e2 = parse_multiplicative_expression();
+		e1 = new b_add_expression(e1->t,e1,e2);
 	}
+	return e1;
 }
 expression* parser::parse_shift_expression(){
-	parse_additive_expression();
+	expression* e1 = parse_additive_expression();
 	//TODO - add shift operators
 	while(lookahead()==tok_op_plus || lookahead()==tok_op_minus){
 		accept();
-		parse_additive_expression();
+		expression* e2 = parse_additive_expression();
+		e1 = new b_shift_expression(e1->t,e1,e2);
 	}
+	return e1;
 }
 expression* parser::parse_relational_expression(){
-	parse_shift_expression();
+	expression* e1 = parse_shift_expression();
 	while(lookahead()==tok_op_gt || lookahead()==tok_op_lt || lookahead()==tok_op_gte || lookahead() == tok_op_lte){
 		accept();
-		parse_shift_expression();
+		expression* e2 = parse_shift_expression();
+		e1 = new b_rel_expression(e1->t,e1,e2);
 	}
+	return e1;
 }
 expression* parser::parse_equality_expression(){
-	parse_relational_expression();
+	expression* e1 = parse_relational_expression();
 	while(lookahead()==tok_op_eq || lookahead()==tok_op_neq){
 		accept();
-		parse_relational_expression();
+		expression* e2 = parse_relational_expression();
+		e1 = new b_eq_expression(e1->t,e1,e2);
 	}
+	return e1;
 }
 expression* parser::parse_bitwise_and_expression(){
-	parse_relational_expression();
+	expression* e1 = parse_relational_expression();
 	while(lookahead()==tok_op_and_bw){
 		accept();
-		parse_relational_expression();
+		expression* e2 = parse_relational_expression();
+		e1 = new bw_and_expression(e1->t,e1,e2);
 	}
+	return e1;
 }
 expression* parser::parse_bitwise_xor_expression(){
-	parse_bitwise_and_expression();
+	expression* e1 = parse_bitwise_and_expression();
 	while(lookahead()==tok_op_xor_bw){
 		accept();
-		parse_bitwise_and_expression();
+		expression* e2 = parse_bitwise_and_expression();
+		e1 = new bw_xor_expression(e1->t,e1,e2);
 	}
+	return e1;
 }
 expression* parser::parse_bitwise_or_expression(){
-	parse_bitwise_xor_expression();
+	expression* e1 = parse_bitwise_xor_expression();
 	while(lookahead()==tok_op_or_bw){
 		accept();
-		parse_bitwise_xor_expression();
+		expression* e2 = parse_bitwise_xor_expression();
+		e1 = new bw_or_expression(e1->t,e1,e2);
 	}
+	return e1;
 }
 expression* parser::parse_logical_and_expression(){
-	parse_bitwise_or_expression();
+	expression* e1 = parse_bitwise_or_expression();
 	while(lookahead()==tok_kw_and){
 		accept();
-		parse_bitwise_or_expression();
+		expression* e2 = parse_bitwise_or_expression();
+		e1 = new and_expression(e1->t,e1,e2);
 	}
+	return e1;
 }
 expression* parser::parse_logical_or_expression(){
-	parse_logical_and_expression();
+	expression* e1 = parse_logical_and_expression();
 	while(lookahead()==tok_kw_or){
 		accept();
-		parse_logical_and_expression();
+		expression* e2 = parse_logical_and_expression();
+		e1 = new bw_or_expression(e1->t,e1,e2);
 	}
+	return e1;
 }
 expression* parser::parse_conditional_expression(){
-	parse_logical_or_expression();
+	expression* e1 = parse_logical_or_expression();
 	if(lookahead() == tok_op_question){
 		match(tok_op_question);
-		parse_expression();
+		expression* e2 = parse_expression();
 		match(tok_colon);
-		parse_conditional_expression();
-
+		expression* e3 = parse_conditional_expression();
+		return new conditional_expression(e1->t,e1,e2,e3);
 	}
+	return e1;
 }
 expression* parser::parse_assignment_expression(){
-	parse_conditional_expression();
+	expression* e1 = parse_conditional_expression();
 	if(lookahead() == tok_op_assignment){
 		match(tok_op_assignment);
-		parse_assignment_expression();
+		expression* e2 = parse_assignment_expression();
+		return new assignment_expression(e1->t,e1,e2);
 	}
+	return e1;
 }
 expression* parser::parse_constant_expresssion(){return parse_conditional_expression();}
 
@@ -298,47 +320,54 @@ statement* parser::parse_statement(){
 	}
 }
 statement* parser::parse_block_statement(){
+	std::vector<statement*> ss;
 	if(lookahead() == tok_lbrace){
 		match(tok_lbrace);
-		parse_statement_seq();
+		ss = parse_statement_seq();
 		match(tok_rbrace);
 	}
+	return new block_statement(ss);
 }
-statement* parser::parse_statement_seq(){
-	parse_statement();
+std::vector<statement*> parser::parse_statement_seq(){
+	std::vector<statement*> ss;
 	while(lookahead() != tok_rbrace){
-		parse_statement();
+		statement* s = parse_statement();
+		ss.push_back(s);
 	}
+	return ss;
 }
 statement* parser::parse_if_statement(){
 	match(tok_kw_if);
 	match(tok_lparen);
-	parse_expression();
+	expression* e = parse_expression();
 	match(tok_rparen);
-	parse_statement();
-	if(lookahead() == tok_kw_else){
-		match(tok_kw_else);
-		parse_statement();
-	}
+	statement* s1 = parse_statement();
+	match(tok_kw_else);
+	statement* s2 = parse_statement();
+	return new if_statement(e,s1,s2);
 }
 statement* parser::parse_while_statement(){
 	match(tok_kw_while);
 	match(tok_lparen);
-	parse_expression();
+	expression* e = parse_expression();
 	match(tok_rparen);
-	parse_statement();
+	statement* s = parse_statement();
+	return new while_statement(e,s);
 }
 //statement* parser::parse_break_statement(){break;}
 //statement* parser::parse_continue_statement(){continue;}
 statement* parser::parse_return_statement(){
+	expression* e;
 	match(tok_kw_return);
-	if(lookahead() != tok_semicolon){parse_expression();}
+	if(lookahead() != tok_semicolon){e = parse_expression();}
 	match(tok_semicolon);
+	return new return_statement(e);
 }
 //statement* parser::parse_declaration_statement(){parse_local_declaration();}
 statement* parser::parse_expression_statement(){
-	parse_expression();
+	expression* e = parse_expression();
 	match(tok_semicolon);
+	return new expression_statement(e);
 }
 
 //declaration parsing
