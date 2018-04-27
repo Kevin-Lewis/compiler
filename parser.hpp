@@ -6,7 +6,7 @@
 #include "expressions.hpp"
 #include "statements.hpp"
 #include "declarations.hpp"
-#include "translate.hpp"
+#include "scope.hpp"
 
 #include <cassert>
 #include <deque>
@@ -23,8 +23,8 @@ struct parser{
 	//keyword table
 	std::unordered_map<std::string, token_name> kw_table;
 
-	//
-	translate translator;
+	//current scope
+	scope* current_scope;
 
 	//create keyword table
 	void initialize_keytable();
@@ -93,5 +93,8 @@ struct parser{
 	//consumes the current token
 	void accept(){assert(!tokens.empty()); tokens.pop_front();}
 
+	//scope stuff
+	void enter_scope(scope::kind k);
+	void leave_scope();
 
 };

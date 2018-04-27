@@ -27,6 +27,19 @@ void parser::match(token_name t){
 	else{throw std::runtime_error("Syntax error.");}
 }
 
+void parser::enter_scope(scope::kind k){
+
+	if(k == scope::global){current_scope = new scope(k, nullptr);}
+	else{current_scope = new scope(k,current_scope);}
+}
+
+void parser::leave_scope(){
+		scope* temp = current_scope;
+		current_scope = temp->parent;
+		delete temp;
+	}
+
+
 type* parser::parse_type(){return parse_postfix_type();}
 
 type* parser::parse_postfix_type(){
@@ -326,7 +339,9 @@ statement* parser::parse_block_statement(){
 	std::vector<statement*> ss;
 	if(lookahead() == tok_lbrace){
 		match(tok_lbrace);
+		enter_scope(scope::block);
 		ss = parse_statement_seq();
+		leave_scope();
 		match(tok_rbrace);
 	}
 	return new block_statement(ss);
@@ -375,10 +390,12 @@ statement* parser::parse_expression_statement(){
 
 //declaration parsing
 declaration* parser::parse_program(){
+	enter_scope(scope::global);
 	declaration* d;
 	while(!tokens.empty()){
 		d = parse_declaration_seq();
 	}
+	leave_scope();
 	return d;
 }
 declaration* parser::parse_declaration_seq(){
@@ -459,7 +476,9 @@ declaration* parser::parse_function_definition(){
 	token tok = tokens.front();
 	match(tok_identifier);
 	match(tok_lparen);
+	enter_scope(scope::parameter);
 	std::vector<declaration*> decs = parse_parameter_list();
+	leave_scope();
 	match(tok_rparen);
 	statement* s = parse_block_statement();
 	//TODO: Add arrow token
