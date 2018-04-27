@@ -33,6 +33,10 @@ struct expression{
 	expression(kind k) : k(k), t(){}
 	expression(kind k, type* t) : k(k), t(t){}
 
+	bool is_int(){return t->is_int();}
+	bool is_float(){return t->is_float();}
+	bool is_bool(){return t->is_bool();}
+
 	kind k;
 	type* t;
 

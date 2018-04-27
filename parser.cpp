@@ -302,6 +302,7 @@ expression* parser::parse_logical_or_expression(){
 }
 expression* parser::parse_conditional_expression(){
 	expression* e1 = parse_logical_or_expression();
+	if(!e1 -> is_bool()){throw std::runtime_error("expected expression of type bool");}
 	if(lookahead() == tok_op_question){
 		match(tok_op_question);
 		expression* e2 = parse_expression();

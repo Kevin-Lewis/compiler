@@ -13,6 +13,13 @@ struct type{
 
 	type(kind k) : k(k){}
 
+	bool is_int(){return k == int_kind;}
+	bool is_float(){return k == float_kind;}
+	bool is_char(){return k == char_kind;}
+	bool is_bool(){return k == bool_kind;}
+	bool is_ptr(){return k == ptr_kind;}
+	bool is_ref(){return k == ref_kind;}
+
 	kind k;
 
 };
