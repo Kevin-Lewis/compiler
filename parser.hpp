@@ -40,7 +40,7 @@ struct parser{
 	expression* parse_expression();
 	expression* parse_primary_expression();
 	expression* parse_postfix_expression();
-	expression* parse_argument_list();
+	std::vector<expression*> parse_argument_list();
 	expression* parse_argument();
 	expression* parse_unary_expression();
 	expression* parse_cast_expression();

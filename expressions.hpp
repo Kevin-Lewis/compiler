@@ -1,5 +1,6 @@
 #pragma once
 #include "types.hpp"
+#include <vector>
 
 struct expression{
 
@@ -22,6 +23,7 @@ struct expression{
 		float_kind,
 		id_kind,
 		char_kind,
+		postfix_kind,
 		b_add_kind,
 		b_sub_kind,
 		b_mul_kind,
@@ -36,6 +38,9 @@ struct expression{
 	bool is_int(){return t->is_int();}
 	bool is_float(){return t->is_float();}
 	bool is_bool(){return t->is_bool();}
+	bool is_ref(){return t-> is_ref();}
+	bool is_arithmetic(){return t->is_arithmetic();}
+	bool is_numeric(){return t->is_arithmetic();}
 
 	kind k;
 	type* t;
@@ -130,4 +135,10 @@ struct assignment_expression : expression{
 assignment_expression(type*t, expression* e1, expression* e2) : expression(assign_kind, t), left(e1), right(e2){}
 	expression* left;
 	expression* right;
+};
+
+struct postfix_expression : expression{
+postfix_expression(type*t, expression* e, std::vector<expression*> args) : expression(postfix_kind, t), base(e), args(args){}
+	expression* base;
+	std::vector<expression*> args;
 };

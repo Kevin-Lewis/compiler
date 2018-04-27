@@ -145,27 +145,31 @@ expression* parser::parse_primary_expression(){
 }
 expression* parser::parse_postfix_expression(){
 	expression* e = parse_primary_expression();
+	std::vector<expression*> args;
 	switch(lookahead()){
 		case tok_lparen:
-			parse_argument_list();
+			args = parse_argument_list();
 			match(tok_rparen);
-			break;
+			return new postfix_expression(e->t,e,args);
 		case tok_lbracket:
-			parse_argument_list();
+			//TODO - Maybe add index support
+			args = parse_argument_list();
 			match(tok_rbracket);
+			return new postfix_expression(e->t,e,args);
 			break;
 		default: 
 			break;
 	}
 	return e;
 }
-expression* parser::parse_argument_list(){
-	//TODO - Handle argument lists
+std::vector<expression*> parser::parse_argument_list(){
+	std::vector<expression*> args;
 	expression* e = parse_argument();
+	args.push_back(e);
 	while(lookahead() == tok_comma){
-		parse_argument();
+		args.push_back(parse_argument());
 	}
-	return e;
+	return args;
 }
 expression* parser::parse_argument(){return parse_expression();}
 expression* parser::parse_unary_expression(){
@@ -174,11 +178,13 @@ expression* parser::parse_unary_expression(){
 		case tok_op_plus:
 			match(tok_op_plus);
 			e = parse_postfix_expression();
+			if(!e -> is_arithmetic()){throw std::runtime_error("expected expression of type arithmetic");}
 			return new u_add_expression(e);
 
 		case tok_op_minus:
 			match(tok_op_minus);
 			e = parse_postfix_expression();
+			if(!e -> is_arithmetic()){throw std::runtime_error("expected expression of type arithmetic");}
 			return new u_sub_expression(e);
 
 		case tok_op_not_bw:
@@ -211,28 +217,34 @@ expression* parser::parse_cast_expression(){
 }
 expression* parser::parse_multiplicative_expression(){
 	expression* e1 = parse_cast_expression();
+	if(!e1 -> is_arithmetic()){throw std::runtime_error("expected expression of type arithmetic");}
 	while(lookahead()==tok_op_mul || lookahead()==tok_op_div || lookahead()==tok_op_mod){
 		accept();
 		expression* e2 = parse_cast_expression();
+		if(!e2 -> is_arithmetic()){throw std::runtime_error("expected expression of type arithmetic");}
 		e1 = new b_mul_expression(e1->t,e1,e2);
 	}
 	return e1;
 }
 expression* parser::parse_additive_expression(){
 	expression* e1 = parse_multiplicative_expression();
+	if(!e1 -> is_arithmetic()){throw std::runtime_error("expected expression of type arithmetic");}
 	while(lookahead()==tok_op_plus || lookahead()==tok_op_minus){
 		accept();
 		expression* e2 = parse_multiplicative_expression();
+		if(!e2 -> is_arithmetic()){throw std::runtime_error("expected expression of type arithmetic");}
 		e1 = new b_add_expression(e1->t,e1,e2);
 	}
 	return e1;
 }
 expression* parser::parse_shift_expression(){
 	expression* e1 = parse_additive_expression();
+	if(!e1 -> is_int()){throw std::runtime_error("expected expression of type integer");}
 	//TODO - add shift operators
 	while(lookahead()==tok_op_plus || lookahead()==tok_op_minus){
 		accept();
 		expression* e2 = parse_additive_expression();
+		if(!e2 -> is_int()){throw std::runtime_error("expected expression of type integer");}
 		e1 = new b_shift_expression(e1->t,e1,e2);
 	}
 	return e1;
@@ -257,45 +269,55 @@ expression* parser::parse_equality_expression(){
 }
 expression* parser::parse_bitwise_and_expression(){
 	expression* e1 = parse_relational_expression();
+	if(!e1 -> is_int()){throw std::runtime_error("expected expression of type integer");}
 	while(lookahead()==tok_op_and_bw){
 		accept();
 		expression* e2 = parse_relational_expression();
+		if(!e2 -> is_int()){throw std::runtime_error("expected expression of type integer");}
 		e1 = new bw_and_expression(e1->t,e1,e2);
 	}
 	return e1;
 }
 expression* parser::parse_bitwise_xor_expression(){
 	expression* e1 = parse_bitwise_and_expression();
+	if(!e1 -> is_int()){throw std::runtime_error("expected expression of type integer");}
 	while(lookahead()==tok_op_xor_bw){
 		accept();
 		expression* e2 = parse_bitwise_and_expression();
+		if(!e2 -> is_int()){throw std::runtime_error("expected expression of type integer");}
 		e1 = new bw_xor_expression(e1->t,e1,e2);
 	}
 	return e1;
 }
 expression* parser::parse_bitwise_or_expression(){
 	expression* e1 = parse_bitwise_xor_expression();
+	if(!e1 -> is_int()){throw std::runtime_error("expected expression of type integer");}
 	while(lookahead()==tok_op_or_bw){
 		accept();
 		expression* e2 = parse_bitwise_xor_expression();
+		if(!e2 -> is_int()){throw std::runtime_error("expected expression of type integer");}
 		e1 = new bw_or_expression(e1->t,e1,e2);
 	}
 	return e1;
 }
 expression* parser::parse_logical_and_expression(){
 	expression* e1 = parse_bitwise_or_expression();
+	if(!e1 -> is_bool()){throw std::runtime_error("expected expression of type bool");}
 	while(lookahead()==tok_kw_and){
 		accept();
 		expression* e2 = parse_bitwise_or_expression();
+		if(!e2 -> is_bool()){throw std::runtime_error("expected expression of type bool");}
 		e1 = new and_expression(e1->t,e1,e2);
 	}
 	return e1;
 }
 expression* parser::parse_logical_or_expression(){
 	expression* e1 = parse_logical_and_expression();
+	if(!e1 -> is_bool()){throw std::runtime_error("expected expression of type bool");}
 	while(lookahead()==tok_kw_or){
 		accept();
 		expression* e2 = parse_logical_and_expression();
+		if(!e2 -> is_bool()){throw std::runtime_error("expected expression of type bool");}
 		e1 = new bw_or_expression(e1->t,e1,e2);
 	}
 	return e1;
@@ -314,6 +336,7 @@ expression* parser::parse_conditional_expression(){
 }
 expression* parser::parse_assignment_expression(){
 	expression* e1 = parse_conditional_expression();
+	if(!e1 -> is_ref()){throw std::runtime_error("expected expression of type reference");}
 	if(lookahead() == tok_op_assignment){
 		match(tok_op_assignment);
 		expression* e2 = parse_assignment_expression();

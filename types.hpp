@@ -19,6 +19,8 @@ struct type{
 	bool is_bool(){return k == bool_kind;}
 	bool is_ptr(){return k == ptr_kind;}
 	bool is_ref(){return k == ref_kind;}
+	bool is_arithmetic(){return k == int_kind || k == float_kind;}
+	bool is_numeric(){return k == bool_kind || k == int_kind || k == float_kind || k == char_kind;}
 
 	kind k;
 
