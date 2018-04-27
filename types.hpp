@@ -11,7 +11,7 @@ struct type{
 		ref_kind
 	};
 
-	type(kind k) : k(k){}
+	type(kind k, type* otype = nullptr) : k(k), otype(otype){}
 
 	bool is_int(){return k == int_kind;}
 	bool is_float(){return k == float_kind;}
@@ -22,9 +22,9 @@ struct type{
 	bool is_arithmetic(){return k == int_kind || k == float_kind;}
 	bool is_numeric(){return k == bool_kind || k == int_kind || k == float_kind || k == char_kind;}
 
-	bool compareType(type* t1, type* t2);
-
 	kind k;
+
+	type* otype;
 
 };
 
@@ -32,5 +32,5 @@ struct bool_type : type{bool_type() : type(bool_kind){}};
 struct int_type : type{int_type() : type(int_kind){}};
 struct float_type : type{float_type() : type(float_kind){}};
 struct char_type : type{char_type() : type(char_kind){}};
-struct ptr_type : type{ptr_type(type* t) : type(ptr_kind), ptype(t){} type* ptype;};
-struct ref_type : type{ref_type(type* t) : type(ref_kind), rtype(t){} type* rtype;};
+struct ptr_type : type{ptr_type(type* t) : type(ptr_kind, t){}};
+struct ref_type : type{ref_type(type* t) : type(ref_kind, t){}};

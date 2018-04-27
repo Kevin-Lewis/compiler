@@ -98,4 +98,7 @@ struct parser{
 	void leave_scope();
 	void declare_in_scope(declaration* d);
 
+	//compare types
+	bool compareType(type* t1, type* t2);
+
 };

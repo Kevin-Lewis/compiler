@@ -1,7 +1,7 @@
 #include "expressions.hpp"
 
 
-expression* convertExpression(expression* original, type* newType){
+expression* expression::convertExpression(expression* original, type* newType){
 	expression* e = original;
 	type* currentType = original->t;
 	switch(currentType->k){

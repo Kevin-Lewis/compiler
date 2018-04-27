@@ -23,6 +23,12 @@ void parser::initialize_keytable(){
 	kw_table.insert({"float",tok_kw_float});
 }
 
+bool parser::compareType(type* t1, type* t2){
+	if(t1->k != t2->k){throw std::runtime_error("incompatible types");}
+	else{return true;}
+	//TODO - Check pointer object types
+}
+
 void parser::match(token_name t){
 	if(lookahead() == t){std::cout << tokens.front().toString(); accept();}
 	else{throw std::runtime_error("Syntax error.");}
@@ -195,11 +201,13 @@ expression* parser::parse_unary_expression(){
 		case tok_op_and_bw: 
 			match(tok_op_and_bw);
 			e = parse_postfix_expression();
+			if(!e -> is_ref()){throw std::runtime_error("expected expression of type reference");}
 			return new u_ref_expression(e);
 		
 		case tok_op_mul:
 			match(tok_op_mul);
 			e = parse_postfix_expression();
+			if(!e -> is_ref()){throw std::runtime_error("expected expression of type reference");}
 			return new u_mul_expression(e);
 		
 		default: break;
@@ -211,6 +219,7 @@ expression* parser::parse_cast_expression(){
 	while(lookahead() == tok_kw_as){
 		match(tok_kw_as); 
 		type* t = parse_type();
+		e = e->convertExpression(e,t);
 		return new cast_expression(e,t);
 	}
 	return e;
@@ -223,6 +232,7 @@ expression* parser::parse_multiplicative_expression(){
 		expression* e2 = parse_cast_expression();
 		if(!e2 -> is_arithmetic()){throw std::runtime_error("expected expression of type arithmetic");}
 		e1 = new b_mul_expression(e1->t,e1,e2);
+		compareType(e1->t,e2->t);
 	}
 	return e1;
 }
@@ -234,6 +244,7 @@ expression* parser::parse_additive_expression(){
 		expression* e2 = parse_multiplicative_expression();
 		if(!e2 -> is_arithmetic()){throw std::runtime_error("expected expression of type arithmetic");}
 		e1 = new b_add_expression(e1->t,e1,e2);
+		compareType(e1->t,e2->t);
 	}
 	return e1;
 }
@@ -341,7 +352,10 @@ expression* parser::parse_assignment_expression(){
 	if(!e1 -> is_ref()){throw std::runtime_error("expected expression of type reference");}
 	if(lookahead() == tok_op_assignment){
 		match(tok_op_assignment);
+		type* t = e1->t;
 		expression* e2 = parse_assignment_expression();
+		if(e2->t->k == type::ref_kind || e2->t->k == type::ptr_kind){e2 = e2->convertExpression(e2,e2->t->otype);}
+		compareType(e1->t, e2->t);
 		return new assignment_expression(e1->t,e1,e2);
 	}
 	return e1;

@@ -39,9 +39,9 @@ struct expression{
 	bool is_int(){return t->is_int();}
 	bool is_float(){return t->is_float();}
 	bool is_bool(){return t->is_bool();}
-	bool is_ref(){return t-> is_ref();}
 	bool is_arithmetic(){return t->is_arithmetic();}
 	bool is_numeric(){return t->is_arithmetic();}
+	bool is_ref(){return t->is_ref();}
 
 	expression* convertExpression(expression* original, type* newType);
 
