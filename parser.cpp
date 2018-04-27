@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
 
 void parser::initialize_keytable(){
@@ -39,6 +40,14 @@ void parser::leave_scope(){
 		delete temp;
 	}
 
+void parser::declare_in_scope(declaration* d){
+	if(current_scope->search(d->symbol)){
+		std::stringstream ss;
+		ss << "redeclaration of " << d->symbol;
+		throw std::runtime_error(ss.str());
+	}
+	current_scope -> declare(d->symbol, d);
+}
 
 type* parser::parse_type(){return parse_postfix_type();}
 
@@ -447,7 +456,9 @@ declaration* parser::parse_variable_definition(){
 		e = parse_expression();
 	}
 	match(tok_semicolon);
-	return new var_declaration(tok.attr.name,t,e);
+	declaration* d = new var_declaration(tok.attr.name,t,e);
+	declare_in_scope(d);
+	return d;
 }
 declaration* parser::parse_constant_definition(){
 	match(tok_kw_let);
@@ -458,7 +469,9 @@ declaration* parser::parse_constant_definition(){
 	match(tok_op_assignment);
 	expression* e = parse_expression();
 	match(tok_semicolon);
-	return new const_declaration(tok.attr.name,t,e);
+	declaration* d = new const_declaration(tok.attr.name,t,e);
+	declare_in_scope(d);
+	return d;
 }
 declaration* parser::parse_value_definition(){
 	match(tok_kw_def);
@@ -469,7 +482,9 @@ declaration* parser::parse_value_definition(){
 	match(tok_op_assignment);
 	expression* e = parse_expression();
 	match(tok_semicolon);
-	return new value_declaration(tok.attr.name,t,e);
+	declaration* d = new value_declaration(tok.attr.name,t,e);
+	declare_in_scope(d);
+	return d;
 }
 declaration* parser::parse_function_definition(){
 	match(tok_kw_def);
@@ -483,7 +498,9 @@ declaration* parser::parse_function_definition(){
 	statement* s = parse_block_statement();
 	//TODO: Add arrow token
 	type* t = parse_type();
-	return new func_declaration(tok.attr.name,t,decs,s);
+	declaration* d = new func_declaration(tok.attr.name,t,decs,s);
+	declare_in_scope(d);
+	return d;
 }
 std::vector<declaration*> parser::parse_parameter_list(){
 	declaration* d;
@@ -500,5 +517,7 @@ declaration* parser::parse_parameter(){
 	match(tok_identifier);
 	match(tok_colon);
 	type* t = parse_type();
-	return new param_declaration(tok.attr.name,t);
+	declaration* d = new param_declaration(tok.attr.name,t);
+	declare_in_scope(d);
+	return d;
 }

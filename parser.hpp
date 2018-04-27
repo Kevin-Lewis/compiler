@@ -96,5 +96,6 @@ struct parser{
 	//scope stuff
 	void enter_scope(scope::kind k);
 	void leave_scope();
+	void declare_in_scope(declaration* d);
 
 };
