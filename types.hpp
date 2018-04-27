@@ -22,6 +22,8 @@ struct type{
 	bool is_arithmetic(){return k == int_kind || k == float_kind;}
 	bool is_numeric(){return k == bool_kind || k == int_kind || k == float_kind || k == char_kind;}
 
+	bool compareType(type* t1, type* t2);
+
 	kind k;
 
 };

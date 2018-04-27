@@ -29,7 +29,8 @@ struct expression{
 		b_mul_kind,
 		b_shift_kind,
 		b_rel_kind,
-		b_eq_kind
+		b_eq_kind,
+		conv_kind
 	};
 
 	expression(kind k) : k(k), t(){}
@@ -41,6 +42,8 @@ struct expression{
 	bool is_ref(){return t-> is_ref();}
 	bool is_arithmetic(){return t->is_arithmetic();}
 	bool is_numeric(){return t->is_arithmetic();}
+
+	expression* convertExpression(expression* original, type* newType);
 
 	kind k;
 	type* t;
@@ -142,3 +145,9 @@ postfix_expression(type*t, expression* e, std::vector<expression*> args) : expre
 	expression* base;
 	std::vector<expression*> args;
 };
+
+struct converted_expression : expression{
+converted_expression(expression* e, type* t) : expression(conv_kind, t), original(e){}
+	expression* original;
+};
+
