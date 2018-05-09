@@ -187,29 +187,16 @@ struct cg_function
   llvm::Value* generate_int_expr(const int_expression* e);
   llvm::Value* generate_float_expr(const float_expression* e);
   llvm::Value* generate_id_expr(const id_expression* e);
-  llvm::Value* generate_unop_expr(const unop_expression* e);
-  llvm::Value* generate_arithmetic_expr(const unop_expression* e);
-  llvm::Value* generate_int_expr(const unop_expression* e);
-  llvm::Value* generate_float_expr(const unop_expression* e);
-  llvm::Value* generate_bitwise_expr(const unop_expression* e);
-  llvm::Value* generate_logical_expr(const unop_expression* e);
-  llvm::Value* generate_address_expr(const unop_expression* e);
-  llvm::Value* generate_deref_expr(const unop_expression* e);
-  llvm::Value* generate_binop_expr(const binop_expression* e);
-  llvm::Value* generate_arithmetic_expr(const binop_expression* e);
-  llvm::Value* generate_int_expr(const binop_expression* e);
-  llvm::Value* generate_float_expr(const binop_expression* e);
-  llvm::Value* generate_bitwise_expr(const binop_expression* e);
-  llvm::Value* generate_logical_expr(const binop_expression* e);
-  llvm::Value* generate_and_expr(const binop_expression* e);
-  llvm::Value* generate_or_expr(const binop_expression* e);
-  llvm::Value* generate_relational_expr(const binop_expression* e);
+  llvm::Value* generate_address_expr(const u_ref_expression* e);
+  llvm::Value* generate_deref_expr(const u_mul_expression* e);
+  llvm::Value* generate_and_expr(const bw_and_expression* e);
+  llvm::Value* generate_or_expr(const bw_or_expression* e);
   llvm::Value* generate_call_expr(const call_expression* e);
   llvm::Value* generate_index_expr(const index_expression* e);
   llvm::Value* generate_cast_expr(const cast_expression* e);
-  llvm::Value* generate_cond_expr(const cond_expression* e);
+  llvm::Value* generate_cond_expr(const conditional_expression* e);
   llvm::Value* generate_assign_expr(const assign_expression* e);
-  llvm::Value* generate_conv_expr(const conv_expression* e);
+  llvm::Value* generate_conv_expr(const converted_expression* e);
 
   // Statements
   void generate_stmt(const statement* s);
@@ -220,8 +207,8 @@ struct cg_function
   void generate_break_stmt(const break_statement* s);
   void generate_cont_stmt(const cont_statement* s);
   void generate_ret_stmt(const return_statement* s);
-  void generate_decl_stmt(const decl_statement* s);
-  void generate_expr_stmt(const expr_statement* s);
+  void generate_decl_stmt(const declaration_statement* s);
+  void generate_expr_stmt(const expression_statement* s);
 
   // Local declarations
   void generate_decl(const declaration* d);
@@ -617,24 +604,28 @@ cg_function::generate_relational_expr(const binop_expression* e)
 llvm::Value*
 cg_function::generate_call_expr(const call_expression* e)
 {
+  llvm::IRBuilder<> ir(get_current_block());
   return nullptr;
 }
 
 llvm::Value*
 cg_function::generate_index_expr(const index_expression* e)
 {
+  llvm::IRBuilder<> ir(get_current_block());
   return nullptr;
 }
 
 llvm::Value*
 cg_function::generate_assign_expr(const assign_expression* e)
 {
+  llvm::IRBuilder<> ir(get_current_block());
   return nullptr;
 }
 
 llvm::Value*
 cg_function::generate_cond_expr(const cond_expression* e)
 {
+  llvm::IRBuilder<> ir(get_current_block());
   return nullptr;
 }
 
@@ -642,6 +633,7 @@ cg_function::generate_cond_expr(const cond_expression* e)
 llvm::Value*
 cg_function::generate_conv_expr(const conv_expression* c)
 {
+  llvm::IRBuilder<> ir(get_current_block());
   return nullptr;
 }
 
@@ -660,9 +652,9 @@ cg_function::generate_stmt(const statement* s)
   case stmt::break_kind:
     return generate_break_stmt(static_cast<const break_statement*>(s));
   case stmt::cont_kind:
-    return generate_cont_stmt(static_cast<const cont_statement*>(s));
+    return generate_cont_stmt(static_cast<const continue_statement*>(s));
   case stmt::ret_kind:
-    return generate_ret_stmt(static_cast<const ret_statement*>(s));
+    return generate_ret_stmt(static_cast<const return_statement*>(s));
   case stmt::decl_kind:
     return generate_decl_stmt(static_cast<const decl_statement*>(s));
   case stmt::expr_kind:
@@ -673,46 +665,61 @@ cg_function::generate_stmt(const statement* s)
 void
 cg_function::generate_block_stmt(const block_statement* s)
 {
+  llvm::IRBuilder<> ir(get_current_block());
 }
 
 void
 cg_function::generate_when_stmt(const when_statement* s)
 {
+  llvm::IRBuilder<> ir(get_current_block());
 }
 
 void
 cg_function::generate_if_stmt(const if_statement* s)
 {
+  llvm::IRBuilder<> ir(get_current_block());
 }
 
 void
 cg_function::generate_while_stmt(const while_statement* s)
 {
+  llvm::IRBuilder<> ir(get_current_block());
 }
 
 void
 cg_function::generate_break_stmt(const break_statement* e)
 {
+  llvm::IRBuilder<> ir(get_current_block());
+  //TODO - Support Continue and Break
+  ir.CreateBr(get_current_block());
 }
 
 void
 cg_function::generate_cont_stmt(const cont_statement* e)
 {
+  llvm::IRBuilder<> ir(get_current_block());
+  //TODO - Support Continue and Break
+  ir.CreateBr(get_current_block());
 }
 
 void
 cg_function::generate_ret_stmt(const ret_statement* e)
 {
+  llvm::IRBuilder<> ir(get_current_block());
+  llvm::Value* r = generate_expr(e->rvalue);
+  ir.CreateRet(r);
 }
 
 void
 cg_function::generate_decl_stmt(const decl_statement* e)
 {
+  llvm::IRBuilder<> ir(get_current_block());
 }
 
 void
 cg_function::generate_expr_stmt(const expr_statement* e)
 {
+  llvm::IRBuilder<> ir(get_current_block());
 }
 
 void
