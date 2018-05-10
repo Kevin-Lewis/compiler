@@ -242,8 +242,8 @@ struct cg_function
 std::string
 cg_context::get_name(const declaration* d)
 {
-  assert(d->get_name());
-  return *d->get_name();
+  assert(d->symbol);
+  return *d->symbol;
 }
 
 /// Generate the corresponding type.
@@ -590,30 +590,28 @@ cg_function::generate_call_expr(const call_expression* e)
 {
   llvm::IRBuilder<> ir(get_current_block());
   return nullptr;
-}
-
-llvm::Value*
-cg_function::generate_index_expr(const index_expression* e)
-{
-  llvm::IRBuilder<> ir(get_current_block());
-  return nullptr;
+  //return ir.CreateCall(e);
 }
 
 llvm::Value*
 cg_function::generate_assign_expr(const assignment_expression* e)
 {
   llvm::IRBuilder<> ir(get_current_block());
-  return nullptr;
+  llvm::Value* lhs = generate_expr(e->left);
+  llvm::Value* rhs = generate_expr(e->right);
+  return ir.CreateStore(rhs,lhs);
 }
 
 llvm::Value*
 cg_function::generate_cond_expr(const conditional_expression* e)
 {
   llvm::IRBuilder<> ir(get_current_block());
-  return nullptr;
+  llvm::BasicBlock* t = make_block("True");
+  llvm::BasicBlock* f = make_block("False");
+  llvm::Value* = e->cond;
+  return ir.CreateCondBr(cond,t,f);
 }
 
-// FIXME: Clean this up.
 llvm::Value*
 cg_function::generate_conv_expr(const converted_expression* c)
 {
@@ -689,16 +687,16 @@ cg_function::generate_ret_stmt(const return_statement* e)
   ir.CreateRet(r);
 }
 
-void
+/*void
 cg_function::generate_decl_stmt(const declaration_statement* e)
 {
   llvm::IRBuilder<> ir(get_current_block());
-}
+}*/
 
 void
 cg_function::generate_expr_stmt(const expression_statement* e)
 {
-  llvm::IRBuilder<> ir(get_current_block());
+  generate_expr(e->e);
 }
 
 void
