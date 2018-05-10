@@ -1,5 +1,6 @@
 #pragma once
 #include "types.hpp"
+#include "token.hpp"
 #include <vector>
 
 struct expression{
@@ -47,6 +48,7 @@ struct expression{
 
 	kind k;
 	type* t;
+	token_name op;
 
 };
 

@@ -263,9 +263,11 @@ expression* parser::parse_shift_expression(){
 expression* parser::parse_relational_expression(){
 	expression* e1 = parse_shift_expression();
 	if(!e1 -> is_int()){throw std::runtime_error("expected expression of type numeric");}
+	e1 -> op = lookahead();
 	while(lookahead()==tok_op_gt || lookahead()==tok_op_lt || lookahead()==tok_op_gte || lookahead() == tok_op_lte){
 		accept();
 		expression* e2 = parse_shift_expression();
+		e2->op = lookahead();
 		if(!e2 -> is_int()){throw std::runtime_error("expected expression of type numeric");}
 		e1 = new b_rel_expression(e1->t,e1,e2);
 	}
