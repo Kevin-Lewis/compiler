@@ -85,7 +85,7 @@ struct b_shift_expression : expression{
 	b_shift_expression(type*t, expression* e1, expression* e2) : expression(b_shift_kind, t), left(e1), right(e2){}
 	expression* left;
 	expression* right;
-};
+};+++
 
 struct b_rel_expression : expression{
 	b_rel_expression(type*t, expression* e1, expression* e2) : expression(b_shift_kind, t), left(e1), right(e2){}

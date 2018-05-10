@@ -389,7 +389,7 @@ void
 cg_module::generate_var_decl(const var_declaration* d)
 {
   std::string n = get_name(d);
-  llvm::Type* t = get_type(d->get_type());
+  llvm::Type* t = get_type(d->t);
   llvm::Constant* c = llvm::Constant::getNullValue(t);
   llvm::GlobalVariable* var = new llvm::GlobalVariable(
       *mod, t, false, llvm::GlobalVariable::ExternalLinkage, c, n);
@@ -445,7 +445,7 @@ cg_function::cg_function(cg_module& m, const fn_declaration* d)
     arg.setName(get_name(parm));
 
     // Declare local variable for each parameter and initialize it
-    // with wits corresponding value.
+    // with its corresponding value.
     llvm::Value* var = ir.CreateAlloca(arg.getType(), nullptr, arg.getName());
     declare(parm, var);
 
@@ -615,8 +615,7 @@ cg_function::generate_cond_expr(const conditional_expression* e)
 llvm::Value*
 cg_function::generate_conv_expr(const converted_expression* c)
 {
-  llvm::IRBuilder<> ir(get_current_block());
-  return nullptr;
+  return generate_expr(c->e);
 }
 
 void
@@ -653,14 +652,32 @@ cg_function::generate_block_stmt(const block_statement* s)
 void
 cg_function::generate_if_stmt(const if_statement* s)
 {
-  expression* e = s-> cond;
   llvm::IRBuilder<> ir(get_current_block());
+  Value* v = generate_cond_expr (s-> cond);
+  if(!v)
+    return nullptr;
+  v = ir.CreateFCmpONE(ConstantFP::get(get_context(),APFloat(0,0)), "ifcond");
+  llvm::BasicBlock* ifTrue = make_block("ifTrue");
+  llvm::BasicBlock* ifFalse = make_block("ifFalse");
+  ir.CreateBr(ifTrue,IfElse);
+  emit_block(ifTrue);
+  generate_stmt(s->t);
+  emit_block(ifFalse);
+  generate_stmt(s->f);
+
 }
 
 void
 cg_function::generate_while_stmt(const while_statement* s)
 {
   llvm::IRBuilder<> ir(get_current_block());
+  llvm::BasicBlock* Loop = make_block("Loop");
+  llvm::BasicBlock* Break = make_block("Break");
+  Value* v = generate_cond_expr (s-> cond);
+  emit_block(Loop);
+  generate_stmt(s->body);
+  emit_block(Break);
+
 }
 
 void
